@@ -22,6 +22,8 @@ const {RTCPeerConnection, RTCSessionDescription} = window
 
 const servers = {}
 
+const ioAddress = "http://193.163.200.181:3000"
+
 function App() {
 
     const peerConnection = useRef()
@@ -36,7 +38,7 @@ function App() {
         peerConnection.current.ontrack = peerConnectionTrackHandler
         window.currentConnection = peerConnection.current
 
-        socket.current = io("http://192.168.1.9:3000")
+        socket.current = io(ioAddress)
         socket.current.on('all-connected-users', async users => {
             console.log('all connected users is ', users)
             setUsers(users)
