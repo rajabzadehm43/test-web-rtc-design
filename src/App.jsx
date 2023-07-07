@@ -1,16 +1,19 @@
 import {useEffect, useRef, useState} from 'react'
 import './App.css'
 import io from 'socket.io-client'
+import {useImmer} from "use-immer";
 
 const {RTCPeerConnection, RTCSessionDescription} = window
 
-// const servers = {
-//     iceServers: [
-//         {
-//             urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:1930']
-//         }
-//     ]
-// }
+const servers = {
+    iceServers: [
+        {
+            urls: 'turn:37.152.183.197:3478',
+            username: 'test',
+            credential: 'test123'
+        }
+    ]
+}
 
 // const servers = {
 //     iceServers: [
@@ -20,9 +23,10 @@ const {RTCPeerConnection, RTCSessionDescription} = window
 //     ]
 // }
 
-const servers = {}
+// const servers = {}
 
-const ioAddress = "http://193.163.200.181:3000"
+// const ioAddress = "http://localhost:5000/"
+const ioAddress = "https://my-stun-server.iran.liara.run/"
 
 function App() {
 
@@ -31,7 +35,7 @@ function App() {
     const targetVideo = useRef()
     const isUnderCall = useRef(false)
 
-    const [users, setUsers] = useState([])
+    const [users, setUsers] = useImmer([])
 
     useEffect(() => {
         peerConnection.current = new RTCPeerConnection(servers)
@@ -45,13 +49,13 @@ function App() {
         })
 
         socket.current.on('user-connected', userId => {
-            const newUsers = [...users, userId]
-            setUsers(newUsers)
+            setUsers(draft => {
+                draft.push(userId)
+            })
         })
 
         socket.current.on('user-disconnected', userId => {
-            const newUsers = users.filter(u => u.id !== userId)
-            setUsers(newUsers)
+            setUsers(draft => draft.filter(u => u !== userId))
         })
 
         socket.current.on('call-request', async ({caller, offer}) => {
